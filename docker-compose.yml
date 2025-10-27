@@ -1,0 +1,59 @@
+version: '3.8'
+
+services:
+  # n8n - ابزار اتوماسیون
+  n8n:
+    image: n8nio/n8n:latest
+    container_name: n8n
+    restart: unless-stopped
+    ports:
+      - "5678:5678"
+    environment:
+      - N8N_HOST=localhost
+      - N8N_PORT=5678
+      - N8N_PROTOCOL=http
+      - NODE_ENV=production
+      - EXECUTIONS_DATA_SAVE_ON_SUCCESS=all
+      - EXECUTIONS_DATA_SAVE_ON_ERROR=all
+      - GENERIC_TIMEZONE=Asia/Tehran
+    volumes:
+      - n8n_data:/home/node/.n8n
+      - ./workflows:/workflows
+      - ./assets:/assets
+    networks:
+      - agent-network
+
+  # SearXNG - موتور جستجو
+  searxng:
+    image: searxng/searxng:latest
+    container_name: searxng
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      - SEARXNG_SECRET=hijdah_secret_key_2025
+      - SEARXNG_HOSTNAME=localhost:8080
+    volumes:
+      - ./searxng:/etc/searxng
+    networks:
+      - agent-network
+
+  # Ollama - هوش مصنوعی لوکال
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+    restart: unless-stopped
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    networks:
+      - agent-network
+
+networks:
+  agent-network:
+    driver: bridge
+
+volumes:
+  n8n_data:
+  ollama_data:
